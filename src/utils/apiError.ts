@@ -7,8 +7,8 @@ class ApiError extends Error {
   constructor(
     statusCode: number,
     message: string,
-    errors: Error[],
-    stack: string,
+    errors?: Error[],
+    stack?: string,
   ) {
     super(message);
     this.statusCode = statusCode;

@@ -1,30 +1,16 @@
-import cors from "cors";
-import cookieParser from "cookie-parser";
-import express from "express";
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import express from 'express';
+import { config } from './config';
+import configureExpressApp from './utils/setupExpress';
+import { userRouter } from './routes/user.routes';
+import { asyncHandler } from './utils/asyncHandler';
+import axios from 'axios';
+import { serviceRouter } from './utils/serviceRouter';
 
-const app = express();
+const app = configureExpressApp();
+const userServiceUrl = `http://localhost:${config.USER_PORT}`;
 
-app.use(
-  cors({
-    origin: process.env.CORS_ORIGIN,
-    credentials: true,
-  })
-);
-
-app.use(
-  express.json({
-    limit: "16kb",
-  })
-);
-
-app.use(
-  express.urlencoded({
-    extended: true,
-    limit: "16kb",
-  })
-);
-
-// app.use(express.static("public"));
-app.use(cookieParser());
+app.use('/api/v1/user', serviceRouter('/api/v1/user', userServiceUrl));
 
 export default app;

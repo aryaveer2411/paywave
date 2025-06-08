@@ -5,15 +5,19 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon -r dotenv/config --experimental-json-modules dist/index.js",
-    "ts": "ts-node-dev -r dotenv/config --respawn --transpile-only src/index.ts"
+    "main": "ts-node-dev -r dotenv/config --respawn --transpile-only src/index.ts",
+    "user": "ts-node-dev -r dotenv/config --respawn --transpile-only src/services/user.service.ts"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
     "@types/cookie-parser": "^1.4.9",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/multer": "^1.4.13",
     "@types/node": "^22.15.30",
     "eslint": "^9.28.0",
     "nodemon": "^3.1.10",
@@ -23,6 +27,7 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "axios": "^1.9.0",
     "bcrypt": "^5.1.1",
     "cloudinary": "^2.6.0",
     "cookie-parser": "^1.4.7",
@@ -32,6 +37,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.14.0",
     "mongoose-aggregate-paginate-v2": "^1.1.4",
-    "multer": "^1.4.5-lts.2"
+    "multer": "^1.4.5-lts.2",
+    "zod": "^3.25.56"
   }
 }
