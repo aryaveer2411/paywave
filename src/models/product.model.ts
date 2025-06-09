@@ -13,7 +13,7 @@ export interface ProductDocument {
   createdBy: Types.ObjectId;
   plans: Plan[];
   createdAt: Date;
-}
+} 
 
 const PlanSchema = new Schema<Plan>({
   name: {

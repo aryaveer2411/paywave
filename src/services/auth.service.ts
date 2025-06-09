@@ -2,21 +2,24 @@ import configureExpressApp from '../utils/setupExpress';
 const app = configureExpressApp();
 import { config } from '../config';
 import {
-  deleteUser,
-  getAllUSers,
-  registerUser,
-  updateAccountDetails,
-} from '../controllers/user.controller';
+  changePassword,
+  getCurrentUser,
+  loginUser,
+  logOutUser,
+  refreshAccessToken,
+} from '../controllers/auth.controller';
 import { connectDB } from '../database';
 import { errorHandler } from '../middlewares/errorHandler.middleware';
 
-app.post('/register', registerUser);
+app.post('/login', loginUser);
 
-app.delete('/delete', deleteUser);
+app.post('/logout', logOutUser);
 
-app.get('/all', getAllUSers);
+app.patch('refresh-token', refreshAccessToken);
 
-app.patch('/update', updateAccountDetails);
+app.patch('change-password', changePassword);
+
+app.get('get-current-user', getCurrentUser);
 
 connectDB()
   .then(() => {
@@ -25,8 +28,8 @@ connectDB()
       throw error;
     });
     app.use(errorHandler);
-    app.listen(config.USER_PORT, () => {
-      console.log(`app is listining on Port ${config.USER_PORT}`);
+    app.listen(config.AUTH_PORT, () => {
+      console.log(`app is listining on Port ${config.AUTH_PORT}`);
     });
   })
   .catch((error: Error) => {

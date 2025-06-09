@@ -1,16 +1,20 @@
-import cors from 'cors';
-import cookieParser from 'cookie-parser';
-import express from 'express';
 import { config } from './config';
 import configureExpressApp from './utils/setupExpress';
-import { userRouter } from './routes/user.routes';
-import { asyncHandler } from './utils/asyncHandler';
-import axios from 'axios';
 import { serviceRouter } from './utils/serviceRouter';
+import { BASE_URL } from './constants';
 
 const app = configureExpressApp();
-const userServiceUrl = `http://localhost:${config.USER_PORT}`;
+const userUrl = '/api/v1/user';
+const authUrl = "/api/v1/auth";
+const adminUrl = "/api/v1/auth";
+const userServiceUrl = `${BASE_URL}${config.USER_PORT}`;
+const authServiceUrl = `${BASE_URL}${config.AUTH_PORT}`;
+const adminServiceUrl = `${BASE_URL}${config.ADMIN_PORT}`;
 
-app.use('/api/v1/user', serviceRouter('/api/v1/user', userServiceUrl));
+app.use(userUrl, serviceRouter(userUrl, userServiceUrl));
+
+app.use(authUrl, serviceRouter(authUrl, authServiceUrl));
+
+app.use(adminUrl, serviceRouter(adminUrl, adminServiceUrl));
 
 export default app;

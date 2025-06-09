@@ -6,7 +6,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon -r dotenv/config --experimental-json-modules dist/index.js",
     "main": "ts-node-dev -r dotenv/config --respawn --transpile-only src/index.ts",
-    "user": "ts-node-dev -r dotenv/config --respawn --transpile-only src/services/user.service.ts"
+    "user": "ts-node-dev -r dotenv/config --respawn --transpile-only src/services/user.service.ts",
+    "auth": "ts-node-dev -r dotenv/config --respawn --transpile-only src/services/auth.service.ts",
+    "admin": "ts-node-dev -r dotenv/config --respawn --transpile-only src/services/admin.service.ts"
   },
   "author": "",
   "license": "ISC",

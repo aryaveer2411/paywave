@@ -1,22 +1,11 @@
 import configureExpressApp from '../utils/setupExpress';
 const app = configureExpressApp();
 import { config } from '../config';
-import {
-  deleteUser,
-  getAllUSers,
-  registerUser,
-  updateAccountDetails,
-} from '../controllers/user.controller';
+import { addMerchant } from '../controllers/admin.controller';
 import { connectDB } from '../database';
 import { errorHandler } from '../middlewares/errorHandler.middleware';
 
-app.post('/register', registerUser);
-
-app.delete('/delete', deleteUser);
-
-app.get('/all', getAllUSers);
-
-app.patch('/update', updateAccountDetails);
+app.post('/add-merchant', addMerchant);
 
 connectDB()
   .then(() => {
@@ -25,8 +14,8 @@ connectDB()
       throw error;
     });
     app.use(errorHandler);
-    app.listen(config.USER_PORT, () => {
-      console.log(`app is listining on Port ${config.USER_PORT}`);
+    app.listen(config.ADMIN_PORT, () => {
+      console.log(`app is listining on Port ${config.ADMIN_PORT}`);
     });
   })
   .catch((error: Error) => {

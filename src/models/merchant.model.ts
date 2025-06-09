@@ -13,7 +13,7 @@ const merchantSchema = new Schema<MerchantDocument>({
     ref: 'User',
     required: true,
     unique: true,
-  },
+  }, 
   products: [
     {
       type: Schema.Types.ObjectId,

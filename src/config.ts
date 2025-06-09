@@ -1,4 +1,3 @@
-// src/config.ts
 import { z } from 'zod';
 import dotenv from 'dotenv';
 
@@ -8,6 +7,16 @@ const envSchema = z.object({
   PORT: z.string().regex(/^\d+$/, 'PORT must be a number').transform(Number),
 
   USER_PORT: z
+    .string()
+    .regex(/^\d+$/, 'PORT must be a number')
+    .transform(Number),
+
+  AUTH_PORT: z
+    .string()
+    .regex(/^\d+$/, 'PORT must be a number')
+    .transform(Number),
+
+  ADMIN_PORT: z
     .string()
     .regex(/^\d+$/, 'PORT must be a number')
     .transform(Number),

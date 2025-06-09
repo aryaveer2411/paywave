@@ -11,7 +11,7 @@ export interface CustomerDocument {
 }
 
 const customerSchema = new Schema<CustomerDocument>({
-  user: {
+  user: { 
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: true,

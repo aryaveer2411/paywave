@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { config } from '../config';
-const DB_NAME = "paywave";
+import { DB_NAME } from "../constants";
+
 
 const connectDB = async () => {
   try {
