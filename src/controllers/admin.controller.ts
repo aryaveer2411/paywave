@@ -47,4 +47,24 @@ const addMerchant = asyncHandler(async (req, res) => {
   });
 });
 
+//total merchants
+
+// create ,delete , update plans
+
+// delete ,update merchant
+
+// total sales by merchants
+
+// sales by specific merchant
+
+// total active plans
+
+// revoke user plan
+
+//update company details
+
+//delete company
+
+
+
 export { addMerchant };

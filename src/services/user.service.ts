@@ -9,14 +9,17 @@ import {
 } from '../controllers/user.controller';
 import { connectDB } from '../database';
 import { errorHandler } from '../middlewares/errorHandler.middleware';
+import userRouter from '../routes/user';
 
-app.post('/register', registerUser);
+// app.post('/register', registerUser);
 
-app.delete('/delete', deleteUser);
+// app.delete('/delete', deleteUser);
 
-app.get('/all', getAllUSers);
+// app.get('/all', getAllUSers);
 
-app.patch('/update', updateAccountDetails);
+// app.patch('/update', updateAccountDetails);
+
+app.use('/user', userRouter);
 
 connectDB()
   .then(() => {

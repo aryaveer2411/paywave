@@ -10,7 +10,7 @@ function serviceRouter(routePrefix: string, targetBaseUrl: string) {
       const method = req.method.toLowerCase();
 
       console.log(`[Proxy] ${method.toUpperCase()} ${url}`);
-
+      console.log(url);
       try {
         const config: any = {
           method,

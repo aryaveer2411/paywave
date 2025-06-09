@@ -1,25 +1,21 @@
 import configureExpressApp from '../utils/setupExpress';
 const app = configureExpressApp();
 import { config } from '../config';
-import {
-  changePassword,
-  getCurrentUser,
-  loginUser,
-  logOutUser,
-  refreshAccessToken,
-} from '../controllers/auth.controller';
 import { connectDB } from '../database';
 import { errorHandler } from '../middlewares/errorHandler.middleware';
+import authRouter from '../routes/auth';
 
-app.post('/login', loginUser);
+// app.post('/login', loginUser);
 
-app.post('/logout', logOutUser);
+// app.post('/logout', logOutUser);
 
-app.patch('refresh-token', refreshAccessToken);
+// app.patch('refresh-token', refreshAccessToken);
 
-app.patch('change-password', changePassword);
+// app.patch('change-password', changePassword);
 
-app.get('get-current-user', getCurrentUser);
+// app.get('get-current-user', getCurrentUser);
+
+app.use('/auth', authRouter);
 
 connectDB()
   .then(() => {
