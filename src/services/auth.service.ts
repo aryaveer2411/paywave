@@ -5,16 +5,6 @@ import { connectDB } from '../database';
 import { errorHandler } from '../middlewares/errorHandler.middleware';
 import authRouter from '../routes/auth';
 
-// app.post('/login', loginUser);
-
-// app.post('/logout', logOutUser);
-
-// app.patch('refresh-token', refreshAccessToken);
-
-// app.patch('change-password', changePassword);
-
-// app.get('get-current-user', getCurrentUser);
-
 app.use('/auth', authRouter);
 
 connectDB()

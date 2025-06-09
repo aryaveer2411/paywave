@@ -1,12 +1,9 @@
 import configureExpressApp from '../utils/setupExpress';
 const app = configureExpressApp();
 import { config } from '../config';
-import { addMerchant } from '../controllers/admin.controller';
 import { connectDB } from '../database';
 import { errorHandler } from '../middlewares/errorHandler.middleware';
 import adminRouter from '../routes/admin';
-
-// app.post('/add-merchant', addMerchant);
 
 app.use('/admin', adminRouter);
 
