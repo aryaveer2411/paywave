@@ -4,14 +4,12 @@ import { ApiError } from '../utils/apiError';
 import { ApiResponse } from '../utils/apiResponse';
 import { asyncHandler } from '../utils/asyncHandler';
 
-
 interface RegisterUserBody {
   name: string;
   email: string;
   password: string;
   companyName: string;
 }
-
 
 const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password, companyName }: RegisterUserBody = req.body;
@@ -61,31 +59,31 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 });
 
-const deleteUser = asyncHandler(async (req, res) => {
-  const { userID } = req.query;
-  const isUserExist = await User.findById(userID);
-  if (!isUserExist) {
-    throw new ApiError(400, 'user doesnt exist');
-  }
-  const company: CompanyDocument | null = await Company.findOne({
-    admin: userID,
-  });
-  if (company?.users.length !== 0) {
-    throw new ApiError(
-      401,
-      'You are admin , transfer your admin status to someone else',
-    );
-  }
-  const userDeleted = await User.findByIdAndDelete(userID).lean();
-  if (!userDeleted) {
-    throw new ApiError(400, 'Cant fullfill opertaion');
-  }
-  // Convert the deleted user to a plain object to avoid circular references
-  // const userDeletedPlain = userDeleted.toObject();
-  res.status(201).json({
-    response: new ApiResponse(200, 'User Deleted', userDeleted),
-  });
-});
+// const deleteUser = asyncHandler(async (req, res) => {
+//   const { userID } = req.query;
+//   const isUserExist: UserDocument | null = await User.findById(userID);
+//   if (!isUserExist) {
+//     throw new ApiError(400, 'user doesnt exist');
+//   }
+//   const company: CompanyDocument | null = await Company.findOne({
+//     admin: userID,
+//   });
+//   if (company?.users.length !== 0) {
+//     throw new ApiError(
+//       401,
+//       'You are admin , transfer your admin status to someone else',
+//     );
+//   }
+//   const userDeleted = await User.findByIdAndDelete(userID).lean();
+//   if (!userDeleted) {
+//     throw new ApiError(400, 'Cant fullfill opertaion');
+//   }
+//   // Convert the deleted user to a plain object to avoid circular references
+//   // const userDeletedPlain = userDeleted.toObject();
+//   res.status(201).json({
+//     response: new ApiResponse(200, 'User Deleted', userDeleted),
+//   });
+// });
 
 const getAllUSers = asyncHandler(async (req, res) => {
   const users = await User.find().select('-password -refreshToken');
@@ -121,10 +119,4 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
   });
 });
 
-
-export {
-  registerUser,
-  updateAccountDetails,
-  deleteUser,
-  getAllUSers,
-};
+export { registerUser, updateAccountDetails,  getAllUSers };
