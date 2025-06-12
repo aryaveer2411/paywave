@@ -1,10 +1,12 @@
 import { Router } from 'express';
-// import { createPlan, updatePlan, deletePlan } from '../../controllers/admin.controller';
+import { createPlan, getPlansForProduct, updatePlan, deletePlan } from '../../controllers/admin.controller';
+// import { createPlan, updatePlan, deletePlan, getPlansForProduct } from '../../controllers/plan.controller';
 
 const planRouter = Router();
 
-// planRouter.post('/create', createPlan);
-// planRouter.patch('/:id', updatePlan);
-// planRouter.delete('/:id', deletePlan);
+planRouter.post('/:productId' , createPlan );
+planRouter.get('/:productId' ,getPlansForProduct );
+planRouter.patch('/:productId/:planId' ,updatePlan );
+planRouter.delete('/:productId/:planId' ,deletePlan);
 
 export default planRouter;

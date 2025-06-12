@@ -19,6 +19,19 @@ interface UpdateCompany {
   newAdmin?: string;
 }
 
+interface PlanInput {
+  name: string;
+  price: number;
+  interval: 'monthly' | 'yearly';
+  features: string[];
+}
+
+interface CreateProductBody {
+  name: string;
+  description?: string;
+  plans: PlanInput[];
+}
+
 const addMerchant = asyncHandler(async (req, res) => {
   if (req.user === undefined) {
     throw new ApiError(400, 'Auth failed');
@@ -264,6 +277,190 @@ const deleteCompany = asyncHandler(async (req, res) => {
   });
 });
 
+const createProduct = asyncHandler(async (req, res) => {
+  const admin = req.company?.isAdmin;
+  if (admin) {
+    throw new ApiError(401, 'only admin can add products');
+  }
+  const adminId = req.user?._id;
+  if (!adminId) {
+    throw new ApiError(401, 'Auth failed');
+  }
+  const { name, description, plans }: CreateProductBody = req.body;
+  const createdBy = adminId;
+
+  const newProduct = new Product({
+    name,
+    description,
+    createdBy,
+    plans,
+  });
+
+  const productCreated = await newProduct.save();
+  
+  if (!productCreated) {
+    throw new ApiError(401, "Product creation failed");
+  }
+});
+
+const getAllProducts = asyncHandler(async (req, res) => {
+  const products = await Product.find({});
+  res.status(200).json({
+    count: products.length,
+    products,
+  });
+});
+
+const getProduct = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  if (!isValidObjectId(id)) {
+    throw new ApiError(400, 'Invalid product ID');
+  }
+  const product = await Product.findById(id);
+  if (!product) {
+    throw new ApiError(404, 'Product not found');
+  }
+  res.status(200).json({
+    product,
+  });
+});
+
+const updateProduct = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  if (!isValidObjectId(id)) {
+    throw new ApiError(400, 'Invalid product ID');
+  }
+  const { name, description, plans }: CreateProductBody = req.body;
+  const updateData: Partial<CreateProductBody> = {};
+  if (name) updateData.name = name;
+  if (description) updateData.description = description;
+  if (plans) updateData.plans = plans;
+
+  const updatedProduct = await Product.findByIdAndUpdate(
+    id,
+    { $set: updateData },
+    { new: true, runValidators: true }
+  );
+  if (!updatedProduct) {
+    throw new ApiError(404, 'Product not found');
+  }
+  res.status(200).json({
+    response: new ApiResponse(200, 'Product updated', updatedProduct),
+  });
+});
+
+const deleteProduct = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  if (!isValidObjectId(id)) {
+    throw new ApiError(400, 'Invalid product ID');
+  }
+  const deletedProduct = await Product.findByIdAndDelete(id);
+  if (!deletedProduct) {
+    throw new ApiError(404, 'Product not found');
+  }
+  res.status(200).json({
+    response: new ApiResponse(200, 'Product deleted', deletedProduct),
+  });
+});
+
+
+const createPlan = asyncHandler(async (req, res) => {
+  const { productId } = req.params;
+  const { name, price, interval, features }: PlanInput = req.body;
+
+  if (!isValidObjectId(productId)) {
+    throw new ApiError(400, 'Invalid product ID');
+  }
+
+  const product = await Product.findById(productId);
+  if (!product) {
+    throw new ApiError(404, 'Product not found');
+  }
+
+  const newPlan = { name, price, interval, features };
+  product.plans.push(newPlan);
+  await product.save();
+
+  res.status(201).json({
+    response: new ApiResponse(201, 'Plan added', product.plans[product.plans.length - 1]),
+  });
+});
+
+const getPlansForProduct = asyncHandler(async (req, res) => {
+  const { productId } = req.params;
+
+  if (!isValidObjectId(productId)) {
+    throw new ApiError(400, 'Invalid product ID');
+  }
+
+  const product = await Product.findById(productId);
+  if (!product) {
+    throw new ApiError(404, 'Product not found');
+  }
+
+  res.status(200).json({
+    count: product.plans.length,
+    plans: product.plans,
+  });
+});
+
+const updatePlan = asyncHandler(async (req, res) => {
+  const { productId, planId } = req.params;
+  const { name, price, interval, features }: Partial<PlanInput> = req.body;
+
+  if (!isValidObjectId(productId)) {
+    throw new ApiError(400, 'Invalid product ID');
+  }
+
+  const product = await Product.findById(productId);
+  if (!product) {
+    throw new ApiError(404, 'Product not found');
+  }
+
+  const planIndex = parseInt(planId, 10);
+  if (isNaN(planIndex) || planIndex < 0 || planIndex >= product.plans.length) {
+    throw new ApiError(404, 'Plan not found');
+  }
+
+  if (name !== undefined) product.plans[planIndex].name = name;
+  if (price !== undefined) product.plans[planIndex].price = price;
+  if (interval !== undefined) product.plans[planIndex].interval = interval;
+  if (features !== undefined) product.plans[planIndex].features = features;
+
+  await product.save();
+
+  res.status(200).json({
+    response: new ApiResponse(200, 'Plan updated', product.plans[planIndex]),
+  });
+});
+
+const deletePlan = asyncHandler(async (req, res) => {
+  const { productId, planId } = req.params;
+
+  if (!isValidObjectId(productId)) {
+    throw new ApiError(400, 'Invalid product ID');
+  }
+
+  const product = await Product.findById(productId);
+  if (!product) {
+    throw new ApiError(404, 'Product not found');
+  }
+
+  const planIndex = parseInt(planId, 10);
+  if (isNaN(planIndex) || planIndex < 0 || planIndex >= product.plans.length) {
+    throw new ApiError(404, 'Plan not found');
+  }
+
+  const deletedPlan = product.plans.splice(planIndex, 1)[0];
+  await product.save();
+
+  res.status(200).json({
+    response: new ApiResponse(200, 'Plan deleted', deletedPlan),
+  });
+});
+
+
+
 export {
   addMerchant,
   deleteMerchant,
@@ -271,4 +468,13 @@ export {
   listMerchants,
   updateCompanyDetails,
   deleteCompany,
+  createProduct,
+  getAllProducts,
+  updateProduct,
+  deleteProduct,
+  getProduct,
+  createPlan,
+  getPlansForProduct,
+  updatePlan,
+  deletePlan,
 };
