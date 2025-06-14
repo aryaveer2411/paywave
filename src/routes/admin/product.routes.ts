@@ -9,13 +9,13 @@ import {
 import { verifyJwt } from '../../middlewares/auth.middleware';
 // import { createProduct, updateProduct, deleteProduct, getAllProducts, getProductById } from '../../controllers/product.controller';
 
-const adminProductRouter = Router();
+const productRouter = Router();
 
-adminProductRouter.use(verifyJwt);
-adminProductRouter.post('/', createProduct);
-adminProductRouter.get('/', getAllProducts);
-adminProductRouter.get('/:id' ,getProduct);
-adminProductRouter.patch('/:id' ,updateProduct);
-adminProductRouter.delete('/:id', deleteProduct);
+productRouter.use(verifyJwt);
+productRouter.post('/', createProduct);
+productRouter.get('/', getAllProducts);
+productRouter.get('/:id', getProduct);
+productRouter.patch('/:id', updateProduct);
+productRouter.delete('/:id', deleteProduct);
   
-export default adminProductRouter;
+export default productRouter;

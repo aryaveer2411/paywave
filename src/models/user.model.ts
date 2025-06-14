@@ -1,7 +1,8 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
+import mongoose, { Schema, Document, Types } from 'mongoose';
 import jwt, { SignOptions } from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { config } from '../config';
+import { Roles } from '../constants';
 
 export interface UserDocument extends Document {
   name: string;
@@ -11,6 +12,7 @@ export interface UserDocument extends Document {
   refreshToken?: string;
   createdAt: Date;
   updatedAt: Date;
+  companyId?: Types.ObjectId;
   isPasswordCorrect(password: string): Promise<boolean>;
   generateAccessToken(): string;
   generateRefreshToken(): string;
@@ -34,8 +36,13 @@ const userSchema = new Schema<UserDocument>(
     },
     role: {
       type: String,
-      enum: ['merchant', 'customer'],
+      enum: Object.values(Roles),
       required: true,
+    },
+    companyId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Company',
+      required: false, // Only required for admin/merchant
     },
     refreshToken: {
       type: String,
@@ -93,39 +100,39 @@ userSchema.methods.generateRefreshToken = function (): string {
 export const User = mongoose.model<UserDocument>('User', userSchema);
 
 // Merchant discriminator schema
-interface MerchantDocument extends UserDocument {
-  products: mongoose.Types.ObjectId[];
-  payments: mongoose.Types.ObjectId[];
-}
+// interface MerchantDocument extends UserDocument {
+//   products: mongoose.Types.ObjectId[];
+//   payments: mongoose.Types.ObjectId[];
+// }
 
-const merchantSchema = new Schema<MerchantDocument>({
-  products: [{ type: Schema.Types.ObjectId, ref: 'Product' }],
-  payments: [{ type: Schema.Types.ObjectId, ref: 'Payment' }],
-});
+// const merchantSchema = new Schema<MerchantDocument>({
+//   products: [{ type: Schema.Types.ObjectId, ref: 'Product' }],
+//   payments: [{ type: Schema.Types.ObjectId, ref: 'Payment' }],
+// });
 
-export const Merchant = User.discriminator<MerchantDocument>(
-  'Merchant',
-  merchantSchema,
-);
+// export const Merchant = User.discriminator<MerchantDocument>(
+//   'Merchant',
+//   merchantSchema,
+// );
 
-// Customer discriminator schema
-interface CustomerDocument extends UserDocument {
-  productId?: mongoose.Types.ObjectId;
-  subscriptionStart?: Date;
-  subscriptionEnd?: Date;
-  payments: mongoose.Types.ObjectId[];
-  money: number;
-}
+// // Customer discriminator schema
+// interface CustomerDocument extends UserDocument {
+//   productId?: mongoose.Types.ObjectId;
+//   subscriptionStart?: Date;
+//   subscriptionEnd?: Date;
+//   payments: mongoose.Types.ObjectId[];
+//   money: number;
+// }
 
-const customerSchema = new Schema<CustomerDocument>({
-  productId: { type: Schema.Types.ObjectId, ref: 'Product' },
-  subscriptionStart: Date,
-  subscriptionEnd: Date,
-  payments: [{ type: Schema.Types.ObjectId, ref: 'Payment' }],
-  money: { type: Number, default: 0 },
-});
+// const customerSchema = new Schema<CustomerDocument>({
+//   productId: { type: Schema.Types.ObjectId, ref: 'Product' },
+//   subscriptionStart: Date,
+//   subscriptionEnd: Date,
+//   payments: [{ type: Schema.Types.ObjectId, ref: 'Payment' }],
+//   money: { type: Number, default: 0 },
+// });
 
-export const Customer = User.discriminator<CustomerDocument>(
-  'Customer',
-  customerSchema,
-);
+// export const Customer = User.discriminator<CustomerDocument>(
+//   'Customer',
+//   customerSchema,
+// );

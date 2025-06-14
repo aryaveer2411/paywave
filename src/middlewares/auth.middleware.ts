@@ -1,9 +1,9 @@
-import { ApiError } from '../utils/apiError.js';
-import { asyncHandler } from '../utils/asyncHandler.js';
+import { ApiError } from '../utils/apiError';
+import { asyncHandler } from '../utils/asyncHandler';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import { User, UserDocument } from '../models/user.model.js';
+import { User, UserDocument } from '../models/user.model';
 import { config } from '../config';
-import { Company, CompanyDocument } from '../models/company.model.js';
+import { Company, CompanyDocument } from '../models/company.model';
 import mongoose from 'mongoose';
 
 interface Company {
@@ -38,9 +38,6 @@ const verifyJwt = asyncHandler(async (req, res, next) => {
     const user: UserDocument | null = await User.findById(
       decodedToken?._id,
     ).select('-password -refreshToken');
-    if (!token) {
-      throw new ApiError(401, 'Invalid Access Token');
-    }
     if (!user) {
       throw new ApiError(401, 'User not found');
     }

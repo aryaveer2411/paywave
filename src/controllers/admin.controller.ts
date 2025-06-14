@@ -1,11 +1,11 @@
 import mongoose, { isValidObjectId } from 'mongoose';
 import { Company, CompanyDocument } from '../models/company.model';
-import { User, Merchant, UserDocument } from '../models/user.model';
+import { User, UserDocument } from '../models/user.model';
 import { ApiError } from '../utils/apiError';
 import { ApiResponse } from '../utils/apiResponse';
 import { asyncHandler } from '../utils/asyncHandler';
 import { Product } from '../models/product.model';
-import { response } from 'express';
+import { Merchant } from '../models/merchant.model';
 
 interface UpdateMerchant {
   name?: string;
@@ -37,7 +37,6 @@ const addMerchant = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'Auth failed');
   }
   const { name, email, password } = req.body;
-  const role = 'merchant';
   if (!(name && email)) {
     throw new ApiError(401, 'Username and Email both are required');
   }
@@ -46,7 +45,7 @@ const addMerchant = asyncHandler(async (req, res) => {
   if (!company) {
     throw new ApiError(401, 'You are not authorized to add a merchant');
   }
-  const newUser = new Merchant({ name, email, password, role });
+  const newUser = new Merchant({ name, email, password });
   const isCreated: UserDocument | null = await newUser.save();
   if (!isCreated) {
     throw new ApiError(401, 'Merchant creation failed try again');
@@ -71,7 +70,7 @@ const deleteMerchant = asyncHandler(async (req, res) => {
     throw new ApiError(401, 'Merchant ID is required');
   }
 
-  const company = await Company.findOneAndUpdate(
+  const company: CompanyDocument | null = await Company.findOneAndUpdate(
     { users: id },
     { $pull: { users: id } },
     { new: true },
@@ -79,6 +78,10 @@ const deleteMerchant = asyncHandler(async (req, res) => {
 
   if (!company) {
     throw new ApiError(404, 'Company not found or user not in company');
+  }
+
+  if (String(company.admin) === id) {
+    throw new ApiError(403, 'Cannot delete company admin');
   }
 
   const isUserDeleted: UserDocument | null = await User.findByIdAndDelete(id);
@@ -112,7 +115,7 @@ const updateMerchant = asyncHandler(async (req, res) => {
     });
   }
 
-  const updateData: UpdateMerchant = { role: 'customer' };
+  const updateData: Partial<UpdateMerchant> = {};
   if (name) updateData.name = name;
   if (email) updateData.email = email;
   if (password) updateData.password = password;
@@ -279,7 +282,7 @@ const deleteCompany = asyncHandler(async (req, res) => {
 
 const createProduct = asyncHandler(async (req, res) => {
   const admin = req.company?.isAdmin;
-  if (admin) {
+  if (!admin) {
     throw new ApiError(401, 'only admin can add products');
   }
   const adminId = req.user?._id;
@@ -297,10 +300,14 @@ const createProduct = asyncHandler(async (req, res) => {
   });
 
   const productCreated = await newProduct.save();
-  
+
   if (!productCreated) {
-    throw new ApiError(401, "Product creation failed");
+    throw new ApiError(401, 'Product creation failed');
   }
+
+  return res.status(201).json({
+    response: new ApiResponse(201, 'Product Created',productCreated),
+  });
 });
 
 const getAllProducts = asyncHandler(async (req, res) => {
@@ -339,7 +346,7 @@ const updateProduct = asyncHandler(async (req, res) => {
   const updatedProduct = await Product.findByIdAndUpdate(
     id,
     { $set: updateData },
-    { new: true, runValidators: true }
+    { new: true, runValidators: true },
   );
   if (!updatedProduct) {
     throw new ApiError(404, 'Product not found');
@@ -363,7 +370,6 @@ const deleteProduct = asyncHandler(async (req, res) => {
   });
 });
 
-
 const createPlan = asyncHandler(async (req, res) => {
   const { productId } = req.params;
   const { name, price, interval, features }: PlanInput = req.body;
@@ -376,13 +382,19 @@ const createPlan = asyncHandler(async (req, res) => {
   if (!product) {
     throw new ApiError(404, 'Product not found');
   }
-
+  if (product.plans.find((plan) => plan.name === name)) {
+    throw new ApiError(409, 'Plan with this name already exists');
+  }
   const newPlan = { name, price, interval, features };
   product.plans.push(newPlan);
   await product.save();
 
   res.status(201).json({
-    response: new ApiResponse(201, 'Plan added', product.plans[product.plans.length - 1]),
+    response: new ApiResponse(
+      201,
+      'Plan added',
+      product.plans[product.plans.length - 1],
+    ),
   });
 });
 
@@ -458,8 +470,6 @@ const deletePlan = asyncHandler(async (req, res) => {
     response: new ApiResponse(200, 'Plan deleted', deletedPlan),
   });
 });
-
-
 
 export {
   addMerchant,

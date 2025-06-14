@@ -1,36 +1,40 @@
 import mongoose, { Schema, Types } from 'mongoose';
 
 export interface Plan {
+  _id?: string;
   name: string;
   price: number;
   interval: 'monthly' | 'yearly';
   features: string[];
 }
 
-export interface ProductDocument {
+export interface ProductDocument extends Document {
   name: string;
   description?: string;
   createdBy: Types.ObjectId;
   plans: Plan[];
   createdAt: Date;
-} 
+}
 
-const PlanSchema = new Schema<Plan>({
-  name: {
-    type: String,
-    required: true,
+const PlanSchema = new Schema<Plan>(
+  {
+    name: {
+      type: String,
+      required: true,
+    },
+    price: {
+      type: Number,
+      required: true,
+    },
+    interval: {
+      type: String,
+      enum: ['monthly', 'yearly'],
+      required: true,
+    },
+    features: [String],
   },
-  price: {
-    type: Number,
-    required: true,
-  },
-  interval: {
-    type: String,
-    enum: ['monthly', 'yearly'],
-    required: true,
-  },
-  features: [String],
-});
+  { _id: true },
+);
 
 const productSchema = new Schema<ProductDocument>({
   name: {

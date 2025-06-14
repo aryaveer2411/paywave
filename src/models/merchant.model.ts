@@ -1,35 +1,24 @@
 import mongoose, { Schema, Types } from 'mongoose';
+import { User, UserDocument } from './user.model';
+import { Roles } from '../constants';
 
-export interface MerchantDocument {
-  user: Types.ObjectId;
+export interface MerchantDocument extends UserDocument {
   products: Types.ObjectId[];
   payments: Types.ObjectId[];
   planExpiryDate?: Date;
 }
 
-const merchantSchema = new Schema<MerchantDocument>({
-  user: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-    unique: true,
-  }, 
-  products: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: 'Product',
-    },
-  ],
-  payments: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: 'Payment',
-    },
-  ],
-  planExpiryDate: { type: Date },
-});
+const merchantSchema = new Schema<MerchantDocument>(
+  {
+    role: { type: String, default: Roles.MERCHANT },
+    products: [{ type: Schema.Types.ObjectId, ref: 'Product' }],
+    payments: [{ type: Schema.Types.ObjectId, ref: 'Payment' }],
+    planExpiryDate: Date,
+  },
+  { _id: false },
+);
 
-export const Merchant = mongoose.model<MerchantDocument>(
+export const Merchant = User.discriminator<MerchantDocument>(
   'Merchant',
   merchantSchema,
 );

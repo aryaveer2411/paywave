@@ -1,8 +1,10 @@
 import mongoose, { Schema, Types } from 'mongoose';
+import { User, UserDocument } from './user.model';
+import { Roles } from '../constants';
 
-export interface CustomerDocument {
-  user: Types.ObjectId;
+export interface CustomerDocument extends UserDocument {
   productId?: Types.ObjectId;
+  planId?: string;
   subscriptionStart?: Date;
   subscriptionEnd?: Date;
   payments: Types.ObjectId[];
@@ -10,34 +12,21 @@ export interface CustomerDocument {
   money: number;
 }
 
-const customerSchema = new Schema<CustomerDocument>({
-  user: { 
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-    unique: true,
+const customerSchema = new Schema<CustomerDocument>(
+  {
+    role: { type: String, default: Roles.CUSTOMER },
+    productId: { type: Schema.Types.ObjectId, ref: 'Product' },
+    planId: { type: String }, // embedded plan ID
+    subscriptionStart: Date,
+    subscriptionEnd: Date,
+    payments: [{ type: Schema.Types.ObjectId, ref: 'Payment' }],
+    planExpiryDate: Date,
+    money: { type: Number, default: 0 },
   },
-  productId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Product',
-  },
-  subscriptionStart: { type: Date },
-  subscriptionEnd: { type: Date },
-  payments: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: 'Payment',
-    },
-  ],
-  planExpiryDate: { type: Date },
-  money: {
-    type: Number,
-    required: true,
-    default: 0,
-  },
-});
+  { _id: false },
+);
 
-export const Customer = mongoose.model<CustomerDocument>(
+export const Customer = User.discriminator<CustomerDocument>(
   'Customer',
   customerSchema,
 );

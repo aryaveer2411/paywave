@@ -37,7 +37,7 @@ const loginUser = asyncHandler(async (req, res) => {
     );
   }
   const user = await User.findOne({
-    $or: [{ userName: userName }, { userEmail: userEmail }],
+    $or: [{ name: userName }, { email: userEmail }],
   });
   if (!user) {
     throw new ApiError(404, 'No user exist', [], 'Not Found');
@@ -94,7 +94,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
     const decodedToken: JwtPayload | string = jwt.verify(
       incomingToken,
-      config.ACCESS_TOKEN_SECRET,
+      config.REFRESH_TOKEN_SECRET,
     );
     if (typeof decodedToken === 'string') {
       throw new ApiError(401, 'Invalid format of jwt payload');
@@ -132,13 +132,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 });
 
 const changePassword = asyncHandler(async (req, res) => { 
-  const incomingAccessToken =
-    req.cookies?.accessToken || req.header('accessToken');
   const { currentPassword, newPassword } = req.body;
-  if (!incomingAccessToken) {
-    throw new ApiError(401, 'Invalid request');
-    // logOutUser();
-  }
   if (!req.user || !req.user._id) {
     throw new ApiError(401, 'User not authenticated');
   }

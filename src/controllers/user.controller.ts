@@ -1,5 +1,8 @@
+import { Roles } from '../constants';
 import { Company, CompanyDocument } from '../models/company.model';
-import { User, Merchant, Customer, UserDocument } from '../models/user.model';
+import { Customer } from '../models/customer.model';
+import { Merchant } from '../models/merchant.model';
+import { User, UserDocument } from '../models/user.model';
 import { ApiError } from '../utils/apiError';
 import { ApiResponse } from '../utils/apiResponse';
 import { asyncHandler } from '../utils/asyncHandler';
@@ -8,55 +11,70 @@ interface RegisterUserBody {
   name: string;
   email: string;
   password: string;
-  companyName: string;
+  companyName?: string;
 }
 
 const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password, companyName }: RegisterUserBody = req.body;
-  console.log(name, email, password, companyName);
-  const role = companyName?.trim() ? 'merchant' : 'customer';
-  if (!(name && email && password)) {
+
+  if (!name || !email || !password) {
     throw new ApiError(400, 'All fields are required');
   }
-  const user: UserDocument | null = await User.findOne({ email: email });
-  if (user) {
-    throw new ApiError(400, 'User already exist');
+
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    throw new ApiError(400, 'User already exists');
   }
-  let newUser;
-  if (role === 'merchant') {
-    newUser = new Merchant({ name, email, password, role });
-  } else if (role === 'customer') {
-    newUser = new Customer({ name, email, password, role });
-  } else {
-    throw new ApiError(400, 'Role must be merchant or customer');
+
+  const isMerchant = companyName?.trim() !== '';
+  const role = isMerchant ? Roles.MERCHANT : Roles.CUSTOMER;
+
+  if (![Roles.MERCHANT, Roles.CUSTOMER].includes(role)) {
+    throw new ApiError(400, 'Invalid role assignment');
   }
-  const isUserCreated = await newUser.save();
-  if (!isUserCreated) {
-    throw new ApiError(400, 'User creation failed');
-  }
-  if (companyName !== '') {
-    const company = new Company({
-      name: companyName,
-      users: [isUserCreated._id],
-      admin: isUserCreated._id,
-    });
-    const isCompanyCreated = await company.save();
-    if (!isCompanyCreated) {
-      await User.findByIdAndDelete(isUserCreated._id);
-      throw new ApiError(400, 'Failed try again');
+
+  let newUser: UserDocument;
+
+  // Merchant flow
+  if (role === Roles.MERCHANT) {
+    const existingCompany = await Company.findOne({ name: companyName });
+    if (existingCompany) {
+      throw new ApiError(400, 'Company with this name already exists');
     }
-    res.status(201).json({
-      response: new ApiResponse(
-        201,
-        'Merchant created successfully',
-        isCompanyCreated,
-      ),
+
+    const merchant = new Merchant({ name, email, password });
+    newUser = await merchant.save();
+
+    const newCompany = new Company({
+      name: companyName,
+      users: [newUser._id],
+      admin: newUser._id,
     });
-  } else {
-    res.status(201).json({
-      response: new ApiResponse(201, 'User created successfully', newUser),
+
+    const createdCompany = await newCompany.save();
+    if (!createdCompany) {
+      await User.findByIdAndDelete(newUser._id);
+      throw new ApiError(500, 'Company creation failed, try again');
+    }
+
+    newUser.companyId = createdCompany._id as typeof newUser.companyId;
+    await newUser.save();
+
+    return res.status(201).json({
+      response: new ApiResponse(201, 'Merchant and Company created', {
+        user: newUser,
+        company: createdCompany,
+      }),
     });
   }
+
+  // Customer flow
+  const customer = new Customer({ name, email, password });
+  newUser = await customer.save();
+
+  return res.status(201).json({
+    response: new ApiResponse(201, 'Customer created successfully', newUser),
+  });
 });
 
 // const deleteUser = asyncHandler(async (req, res) => {
@@ -98,9 +116,9 @@ const getAllUSers = asyncHandler(async (req, res) => {
 });
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
-  const { userEmail, fullName } = req.body;
-  if (!userEmail || !fullName) {
-    res.status(200).json({
+  const { userEmail, userName } = req.body;
+  if (!userEmail || !userName) {
+    res.status(201).json({
       response: new ApiResponse(201, 'Nothing to update'),
     });
   }
@@ -109,14 +127,14 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
   }
   const user = req.user;
   if (userEmail) user.email = userEmail;
-  if (fullName) user.name = fullName;
+  if (userName) user.name = userName;
   await user.save({ validateBeforeSave: false });
-  res.status(200).json({
+  res.status(201).json({
     response: new ApiResponse(201, 'Update Complete', {
       userEmail: userEmail,
-      fullName: fullName,
+      fullName: userName,
     }),
   });
 });
 
-export { registerUser, updateAccountDetails,  getAllUSers };
+export { registerUser, updateAccountDetails, getAllUSers };

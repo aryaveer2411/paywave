@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 
-export interface CompanyDocument extends Document {
+export interface CompanyDocument extends Document { 
   name: string;
   users: Types.ObjectId[];
   admin: Types.ObjectId;
@@ -13,7 +13,6 @@ const companySchema = new Schema<CompanyDocument>(
     name: {
       type: String,
       required: true,
-      unique: true,
       trim: true,
     },
     users: [
