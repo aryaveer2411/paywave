@@ -15,7 +15,7 @@ connectDB()
     });
     app.use(errorHandler);
     app.listen(config.USER_PORT, () => {
-      console.log(`app is listining on Port ${config.USER_PORT}`);
+      console.log(`User service is listining on Port ${config.USER_PORT}`);
     });
   })
   .catch((error: Error) => {

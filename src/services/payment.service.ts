@@ -3,9 +3,9 @@ const app = configureExpressApp();
 import { config } from '../config';
 import { connectDB } from '../database';
 import { errorHandler } from '../middlewares/errorHandler.middleware';
-import authRouter from '../routes/auth';
+import paymentRouter from '../routes/payment';
 
-app.use('/auth', authRouter);
+app.use('/payment', paymentRouter);
 
 connectDB()
   .then(() => {
@@ -14,8 +14,10 @@ connectDB()
       throw error;
     });
     app.use(errorHandler);
-    app.listen(config.AUTH_PORT, () => {
-      console.log(`Auth service is listining on Port ${config.AUTH_PORT}`);
+    app.listen(config.PAYMENT_PORT, () => {
+      console.log(
+        `Payment service is listining on Port ${config.PAYMENT_PORT}`,
+      );
     });
   })
   .catch((error: Error) => {

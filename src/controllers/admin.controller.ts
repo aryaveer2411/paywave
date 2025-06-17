@@ -282,6 +282,7 @@ const deleteCompany = asyncHandler(async (req, res) => {
 
 const createProduct = asyncHandler(async (req, res) => {
   const admin = req.company?.isAdmin;
+  const companyID = req.company?.companyId;
   if (!admin) {
     throw new ApiError(401, 'only admin can add products');
   }
@@ -290,12 +291,11 @@ const createProduct = asyncHandler(async (req, res) => {
     throw new ApiError(401, 'Auth failed');
   }
   const { name, description, plans }: CreateProductBody = req.body;
-  const createdBy = adminId;
 
   const newProduct = new Product({
     name,
     description,
-    createdBy,
+    companyID,
     plans,
   });
 

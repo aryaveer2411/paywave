@@ -11,7 +11,7 @@ export interface Plan {
 export interface ProductDocument extends Document {
   name: string;
   description?: string;
-  createdBy: Types.ObjectId;
+  owner: Types.ObjectId;
   plans: Plan[];
   createdAt: Date;
 }
@@ -42,9 +42,9 @@ const productSchema = new Schema<ProductDocument>({
     required: true,
   },
   description: String,
-  createdBy: {
+  owner: {
     type: Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'Company',
     required: true,
   },
   plans: {

@@ -15,7 +15,7 @@ connectDB()
     });
     app.use(errorHandler);
     app.listen(config.ADMIN_PORT, () => {
-      console.log(`app is listining on Port ${config.ADMIN_PORT}`);
+      console.log(`Admin service is listining on Port ${config.ADMIN_PORT}`);
     });
   })
   .catch((error: Error) => {
