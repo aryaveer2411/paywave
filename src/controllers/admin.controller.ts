@@ -295,7 +295,7 @@ const createProduct = asyncHandler(async (req, res) => {
   const newProduct = new Product({
     name,
     description,
-    companyID,
+    owner: companyID,
     plans,
   });
 
@@ -306,12 +306,15 @@ const createProduct = asyncHandler(async (req, res) => {
   }
 
   return res.status(201).json({
-    response: new ApiResponse(201, 'Product Created',productCreated),
+    response: new ApiResponse(201, 'Product Created', productCreated),
   });
 });
 
 const getAllProducts = asyncHandler(async (req, res) => {
-  const products = await Product.find({});
+  if (!req.user?.id) {
+    throw new ApiError(401, 'unauth request');
+  }
+  const products = await Product.find({ owner: req.user?.id });
   res.status(200).json({
     count: products.length,
     products,

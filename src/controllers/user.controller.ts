@@ -25,8 +25,10 @@ const registerUser = asyncHandler(async (req, res) => {
   if (existingUser) {
     throw new ApiError(400, 'User already exists');
   }
-
-  const isMerchant = companyName?.trim() !== '';
+  let isMerchant=false;
+  if (companyName && companyName !== '') {
+    isMerchant = true;
+  }
   const role = isMerchant ? Roles.MERCHANT : Roles.CUSTOMER;
 
   if (![Roles.MERCHANT, Roles.CUSTOMER].includes(role)) {

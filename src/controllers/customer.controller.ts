@@ -1,11 +1,13 @@
 import mongoose from 'mongoose';
+import axios from 'axios';
 import { Company, CompanyDocument } from '../models/company.model';
 import { User, UserDocument } from '../models/user.model';
 import { ApiError } from '../utils/apiError';
 import { ApiResponse } from '../utils/apiResponse';
 import { asyncHandler } from '../utils/asyncHandler';
-import { response } from 'express';
+import { config } from '../config';
 import { Product, ProductDocument } from '../models/product.model';
+import { Merchant, MerchantDocument } from '../models/merchant.model';
 
 const getCompanies = asyncHandler(async (req, res) => {
   const companies = await Company.find({});
@@ -49,7 +51,7 @@ const getMerchantById = asyncHandler(async (req, res) => {
   if (!(merchantId && companyId)) {
     throw new ApiError(401, 'Send Merchant and Company ID');
   }
-  const merchant: UserDocument | null = await User.findById(merchantId);
+  const merchant: MerchantDocument | null = await User.findById(merchantId);
   if (!merchant) {
     throw new ApiError(401, 'Merchant not found');
   }
@@ -66,7 +68,10 @@ const getMerchantById = asyncHandler(async (req, res) => {
     throw new ApiError(401, 'product not found');
   }
   return res.status(201).json({
-    response: new ApiResponse(201, 'Products', products),
+    response: new ApiResponse(201, 'Products', {
+      products: products,
+      merchantId: merchantId,
+    }),
   });
 });
 
@@ -76,7 +81,7 @@ const freehMerchant = asyncHandler(async (req, res) => {
   if (!merchantId) {
     throw new ApiError(400, 'Merchant ID is required');
   }
-  const merchant: UserDocument | null = await User.findById(merchantId);
+  const merchant: MerchantDocument | null = await User.findById(merchantId);
   if (!merchant) {
     throw new ApiError(401, 'Merchant not found');
   }
@@ -91,4 +96,60 @@ const freehMerchant = asyncHandler(async (req, res) => {
 
 // hit payments pending needs to be done
 
-export { getCompanies, getMerchantById, getMerchantsByCompany, freehMerchant };
+const selectPlanAndPay = asyncHandler(async (req, res) => {
+  const userID = req.user?.id;
+  if (!userID) {
+    throw new ApiError(401, 'User is logged out');
+  }
+  const { merchantId, productId, planId, paymentMethod } = req.body;
+  if (!merchantId || !productId || !planId || !paymentMethod) {
+    throw new ApiError(401, 'PLease select a product');
+  }
+
+  const product: ProductDocument | null = await Product.findById(productId);
+
+  if (!product) {
+    throw new ApiError(401, 'Please selecta valid product');
+  }
+
+  if (planId > product.plans.length || planId < 0) {
+    throw new ApiError(401, 'Selecta valid plan');
+  }
+
+  const plan = product.plans[planId];
+
+  const duration = plan.interval;
+
+  const paymentPayload = {
+    amount: plan.price,
+    currency: 'INR',
+    paymentMethod,
+    customerId: userID,
+    merchantId,
+    productId,
+    planId,
+    webhookUrl: `http://localhost:${config.MERCHANT_PORT}/merchant/add-plan`, // need to write a controlle rin merchgant controoler to add plan to user
+    referenceId: `${Date.now()}-${userID}-${productId}-${planId}-${duration}`,
+  };
+
+  const paymentServiceUrl = `http://localhost:${config.PAYMENT_PORT}/payment/initiate`;
+
+  try {
+    const paymentRes = await axios.post(paymentServiceUrl, paymentPayload);
+    res.status(paymentRes.status).json(paymentRes.data);
+  } catch (error: any) {
+    throw new ApiError(
+      500,
+      'Payment service error',
+      error?.response?.data || error.message,
+    );
+  }
+});
+
+export {
+  getCompanies,
+  getMerchantById,
+  getMerchantsByCompany,
+  freehMerchant,
+  selectPlanAndPay,
+};

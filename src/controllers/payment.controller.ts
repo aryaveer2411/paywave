@@ -14,7 +14,7 @@ export const initiatePayment = asyncHandler(async (req, res) => {
     merchantId,
   } = req.body;
 
-  const transactionId = randomUUID();
+  const transactionId = randomUUID(); 
 
   const payment = await Payment.create({
     amount,
@@ -38,7 +38,6 @@ export const initiatePayment = asyncHandler(async (req, res) => {
     payment.status = status;
     if (shouldFail) payment.failureReason = 'Card declined (simulated)';
     await payment.save();
-
     await sendWebhook(webhookUrl, {
       transactionId,
       status,
@@ -46,6 +45,7 @@ export const initiatePayment = asyncHandler(async (req, res) => {
       amount,
       currency,
       paymentId: payment._id,
+      customerId,
     });
   }, 3000);
 });

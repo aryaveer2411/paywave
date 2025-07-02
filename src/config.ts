@@ -26,6 +26,16 @@ const envSchema = z.object({
     .regex(/^\d+$/, 'PORT must be a number')
     .transform(Number),
 
+  MERCHANT_PORT: z
+    .string()
+    .regex(/^\d+$/, 'PORT must be a number')
+    .transform(Number),
+  
+  CUSTOMER_PORT: z
+    .string()
+    .regex(/^\d+$/, 'PORT must be a number')
+    .transform(Number),
+
   MONGODB_URI: z.string().min(1, 'MONGODB_URI is required'),
 
   CORS_ORIGIN: z.string().min(1, 'CORS_ORIGIN is required'),

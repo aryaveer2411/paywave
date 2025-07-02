@@ -13,7 +13,6 @@ export interface UserDocument extends Document {
   createdAt: Date;
   updatedAt: Date;
   companyId?: Types.ObjectId;
-  isAvl?: boolean;
   isPasswordCorrect(password: string): Promise<boolean>;
   generateAccessToken(): string;
   generateRefreshToken(): string;
@@ -48,16 +47,6 @@ const userSchema = new Schema<UserDocument>(
     refreshToken: {
       type: String,
     },
-    isAvl: {
-      default: true,
-      type: Boolean,
-      validate: {
-        validator: function (this: any) {
-          return this.role !== 'merchant' ? true : this.isAvl === true;
-        },
-        message: 'isAvl can only be true if role is merchant',
-      }
-    }
   },
   { timestamps: true },
 );

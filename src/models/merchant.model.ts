@@ -6,6 +6,7 @@ export interface MerchantDocument extends UserDocument {
   products: Types.ObjectId[];
   payments: Types.ObjectId[];
   planExpiryDate?: Date;
+  isAvl: boolean;
 }
 
 const merchantSchema = new Schema<MerchantDocument>(
@@ -14,6 +15,10 @@ const merchantSchema = new Schema<MerchantDocument>(
     products: [{ type: Schema.Types.ObjectId, ref: 'Product' }],
     payments: [{ type: Schema.Types.ObjectId, ref: 'Payment' }],
     planExpiryDate: Date,
+    isAvl: {
+      default: true,
+      type: Boolean,
+    },
   },
   { _id: false },
 );

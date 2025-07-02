@@ -9,7 +9,9 @@
     "user": "ts-node-dev -r dotenv/config --respawn --transpile-only src/services/user.service.ts",
     "auth": "ts-node-dev -r dotenv/config --respawn --transpile-only src/services/auth.service.ts",
     "admin": "ts-node-dev -r dotenv/config --respawn --transpile-only src/services/admin.service.ts",
-    "payment": "ts-node-dev -r dotenv/config --respawn --transpile-only src/services/payment.service.ts"
+    "payment": "ts-node-dev -r dotenv/config --respawn --transpile-only src/services/payment.service.ts",
+    "customer": "ts-node-dev -r dotenv/config --respawn --transpile-only src/services/customer.service.ts",
+    "merchant": "ts-node-dev -r dotenv/config --respawn --transpile-only src/services/merchant.service.ts"
   },
   "author": "",
   "license": "ISC",

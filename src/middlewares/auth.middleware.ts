@@ -54,7 +54,13 @@ const verifyJwt = asyncHandler(async (req, res, next) => {
       };
       req.company = companyData;
     }
-
+    if (req.baseUrl.includes('/customer') && user.role === 'merchant') {
+      throw new ApiError(401,"Can not access customer routes")
+    }
+   
+    if (req.baseUrl.includes('/merchant') && user.role === 'customer') {
+      throw new ApiError(401, 'Can not access merchant routes');
+    }
     req.user = user;
     next();
   } catch (error: unknown) {

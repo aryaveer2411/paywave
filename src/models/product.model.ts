@@ -36,26 +36,25 @@ const PlanSchema = new Schema<Plan>(
   { _id: true },
 );
 
-const productSchema = new Schema<ProductDocument>({
-  name: {
-    type: String,
-    required: true,
+const productSchema = new Schema<ProductDocument>(
+  {
+    name: {
+      type: String,
+      required: true,
+    },
+    description: String,
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: 'Company',
+      required: true,
+    },
+    plans: {
+      type: [PlanSchema],
+      required: true,
+    },
   },
-  description: String,
-  owner: {
-    type: Schema.Types.ObjectId,
-    ref: 'Company',
-    required: true,
-  },
-  plans: {
-    type: [PlanSchema],
-    required: true,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+  { timestamps: true },
+);
 
 export const Product = mongoose.model<ProductDocument>(
   'Product',
